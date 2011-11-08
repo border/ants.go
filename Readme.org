@@ -4,5 +4,6 @@
 #+LINK_HOME: https://github.com/border/ants.go
 #+KEYWORDS: AI, aichallenge, go, golang, ants
 
-ants.go is developed for the [[http://aichallenge.org][AIChallenge]] write by [[http://golang.org][golang]]
 
+* Overview
+ants.go is developed for the [[http://aichallenge.org][AI Challenge]] write by [[http://golang.org][Golang]]
