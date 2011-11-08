@@ -1,0 +1,9 @@
+https://github.com/aichallenge/aichallenge/tree/epsilon/ants/dist/starter_bots/go
+
+commit b9bf290ae4dd950b314302a7d4dc3bea42c4a6a4
+Author: janzert <janzert@janzert.com>
+Date:   Mon Nov 7 02:00:19 2011 -0500
+
+    Revert unnecessary modulo in python starter vision and add explanatory comment
+
+
