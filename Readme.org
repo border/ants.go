@@ -5,5 +5,7 @@
 #+KEYWORDS: AI, aichallenge, go, golang, ants
 
 
+
 * Overview
 ants.go is developed for the [[http://aichallenge.org][AI Challenge]] write by [[http://golang.org][Golang]]
+
