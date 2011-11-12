@@ -15,7 +15,6 @@ func main() {
 	mb := NewBot(&s)
 	err = s.Loop(mb, func() {
 		//if you want to do other between-turn debugging things, you can do them here
-        log.Printf("between-turn debugging things")
         mb.Reset()
 	})
 	if err != nil && err != os.EOF {
