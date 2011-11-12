@@ -12,6 +12,7 @@ import (
 //Bot interface defines what we need from a bot
 type Bot interface {
 	DoTurn(s *State) os.Error
+	Reset()
 }
 
 var stdin = bufio.NewReader(os.Stdin)
