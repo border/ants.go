@@ -77,7 +77,6 @@ func (o Item) IsHill() bool {
 	return false
 }
 
-
 //Player returns the player number of the given ant/hill (0 - 9)
 func (o Item) Player() int {
 	if o < 0 || o > OCCUPIED_HILL_9 {
@@ -152,7 +151,6 @@ func FromSymbol(ch byte) Item {
 	}
 	return Item(ch) + 'a'
 }
-
 
 //Location combines (Row, Col) coordinate pairs for use as keys in maps (and in a 1d array)
 type Location int
@@ -328,6 +326,42 @@ func (m *Map) FromLocation(loc Location) (Row, Col int) {
 	return
 }
 
+//FromLocToNewLoc returns an direction array 
+// determine the 1 or 2 fastest (closest) directions to reach a location'
+func (m *Map) FromLocToNewLoc(srcLoc, destLoc Location) (d []Direction) {
+    row1, col1 := m.FromLocation(srcLoc)
+    row2, col2 := m.FromLocation(destLoc)
+    height := m.Rows//2
+    width := m.Cols//2
+    if row1 < row2 {
+        if row2 - row1 >= height {
+            d = append(d, North)
+        } else {
+            d = append(d, South)
+        }
+    } else {
+        if row1 - row2 >= height {
+            d = append(d, South)
+        } else {
+            d = append(d, North)
+        }
+    }
+
+    if col1 < col2 {
+        if col2 - col1 >= width {
+            d = append(d, West)
+        } else {
+            d = append(d, East)
+        }
+    } else {
+        if col1 - col2 >= width {
+            d = append(d, East)
+        } else {
+            d = append(d, West)
+        }
+    }
+	return
+}
 
 //Direction represents the direction concept for issuing orders.
 type Direction int
