@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 )
 
 //Item represents all the various items that may be on the map
@@ -324,6 +325,15 @@ func (m *Map) FromLocation(loc Location) (Row, Col int) {
 	Row = int(loc) / m.Cols
 	Col = int(loc) % m.Cols
 	return
+}
+
+// calculate the closest distance between to locations
+func (m *Map) Distance(srcLoc, destLoc Location) (float64) {
+    row1, col1 := m.FromLocation(srcLoc)
+    row2, col2 := m.FromLocation(destLoc)
+    dCol := math.Fmin(math.Fabs(float64(col1 - col2)), float64(m.Cols) - math.Fabs(float64(col1 - col2)))
+    dRow := math.Fmin(math.Fabs(float64(row1 - row2)), float64(m.Rows) - math.Fabs(float64(row1 - row2)))
+    return dCol + dRow
 }
 
 //FromLocToNewLoc returns an direction array 
