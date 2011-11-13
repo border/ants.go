@@ -17,7 +17,9 @@ type antDistListT []antDistT
 
 type MyBot struct {
     debug bool
+    // to track what moves we have issued.
     orders map[Location]Location
+    // foodLoc:antLoc
     targets map[Location]Location
     state *State
 }
@@ -87,12 +89,19 @@ func (mb *MyBot) doMoveLocation(loc, dest Location) bool {
 
 //DoTurn is where you should do your bot's actual work.
 func (mb *MyBot) DoTurn(s *State) os.Error {
-	//dirs := []Direction{North, East, South, West}
+	dirs := []Direction{North, East, South, West}
     mb.state = s
     var antDistList antDistListT
     log.Printf("---------------------- DoTurn --------------------")
-    log.Printf("-------------------orders: %v-----------------", mb.orders)
     log.Printf("-------------------targets: %v-----------------", mb.targets)
+
+    // prevent stepping on own hil
+    /*
+    for hillLoc, _ := range s.Map.Hills {
+        mb.orders[hillLoc] = s.Map.FromRowCol(0, 0)
+    }
+    */
+    log.Printf("-------------------orders: %v-----------------", mb.orders)
 
     for foodLoc, _ := range s.Map.Food {
         for antLoc, ant := range s.Map.Ants {
@@ -109,6 +118,30 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
 
         }
     }
+
+    // unblock own hill
+    for hillLoc, _ := range s.Map.Hills {
+        for antLoc, _ := range s.Map.Ants {
+            if hillLoc == antLoc {
+                var isHas bool
+                 for _, loc := range mb.orders {
+                    if (hillLoc == loc) {
+                        isHas = true
+                        break
+                    }
+                 }
+                if (isHas) {
+                    break
+                }
+	            for _, d := range dirs {
+                    if mb.doMoveDirection(hillLoc, d) {
+                        break
+                    }
+                }
+            }
+        }
+    }
+
     sort.Sort(antDistList)
 
     if mb.debug {
