@@ -120,9 +120,12 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
     }
 
     // unblock own hill
-    for hillLoc, _ := range s.Map.Hills {
+    for hillLoc, hill := range s.Map.Hills {
+        if hill != MY_HILL {
+            continue
+        }
         for antLoc, _ := range s.Map.Ants {
-            if hillLoc == antLoc {
+            if hillLoc == antLoc  {
                 var isHas bool
                  for _, loc := range mb.orders {
                     if (hillLoc == loc) {
@@ -163,7 +166,7 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
         }
     }
 
-    // explore unseen areas
+    // The map exploration unseen areas
     for antLoc, _ := range s.Map.Ants {
          var isHas bool
          for _, loc := range mb.orders {
@@ -198,7 +201,6 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
             }
         }
     }
-
 
 	//returning an error will halt the whole program!
 	return nil
