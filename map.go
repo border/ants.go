@@ -349,7 +349,7 @@ func (m *Map) FromLocToNewLoc(srcLoc, destLoc Location) (d []Direction) {
         } else {
             d = append(d, South)
         }
-    } else {
+    } else if (row2 < row1){
         if row1 - row2 >= height {
             d = append(d, South)
         } else {
@@ -363,7 +363,7 @@ func (m *Map) FromLocToNewLoc(srcLoc, destLoc Location) (d []Direction) {
         } else {
             d = append(d, East)
         }
-    } else {
+    } else if (col2 < col1){
         if col1 - col2 >= width {
             d = append(d, East)
         } else {

@@ -51,11 +51,16 @@ func (mb *MyBot) Reset() {
 
 // track all moves, prevent collisions
 func (mb *MyBot) doMoveDirection(loc Location, direction Direction) bool {
-    loc2 := mb.state.Map.Move(loc, direction)
-    if mb.state.Map.SafeDestination(loc2) {
-        if _, is := mb.orders[loc2]; !is {
+    newLoc := mb.state.Map.Move(loc, direction)
+    if mb.state.Map.SafeDestination(newLoc) {
+        if _, is := mb.orders[newLoc]; !is {
+            if mb.debug {
+                row, col := mb.state.Map.FromLocation(loc)
+                row2, col2 := mb.state.Map.FromLocation(newLoc)
+                log.Printf("(1)doMoveDirection antLoc(%d, %d), newLoc(%d, %d)", row, col, row2, col2)
+            }
             mb.state.IssueOrderLoc(loc, direction)
-            mb.orders[loc2] = loc
+            mb.orders[newLoc] = loc
             return true
         }
     }
@@ -65,15 +70,14 @@ func (mb *MyBot) doMoveDirection(loc Location, direction Direction) bool {
 // Move Location From source Location to Dest location
 func (mb *MyBot) doMoveLocation(loc, dest Location) bool {
     directions := mb.state.Map.FromLocToNewLoc(loc, dest)
-    log.Printf("FromLoc: %v, DestLoc: %v directions: %v", loc, dest,  directions)
     for _, direction := range directions {
-        if mb.debug {
-            row, col := mb.state.Map.FromLocation(loc)
-            log.Printf("doMoveLocation Loc(%d, %d) direction: %v", row, col,  direction)
-        }
         if mb.doMoveDirection(loc, direction) {
+            if mb.debug {
+                row, col := mb.state.Map.FromLocation(loc)
+                row2, col2 := mb.state.Map.FromLocation(dest)
+                log.Printf("(2)doMoveLocation antLoc(%d, %d), foodLoc(%d, %d) direction: %v", row, col, row2, col2,  direction)
+            }
             mb.targets[dest] = loc
-            log.Printf("------------------\n eating Fooding mb.targets: %v\n------------------", mb.targets)
             return true
         }
     }
@@ -90,13 +94,13 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
     log.Printf("-------------------orders: %v-----------------", mb.orders)
     log.Printf("-------------------targets: %v-----------------", mb.targets)
 
-    for foodLoc, is := range s.Map.Food {
+    for foodLoc, _ := range s.Map.Food {
         for antLoc, ant := range s.Map.Ants {
             if ant != MY_ANT {
                 continue
             }
             if mb.debug {
-                log.Printf("My Ant: %d, antLoc: %v, foodLoc: %v, is: %v\n", ant, antLoc, foodLoc, is)
+                //log.Printf("My Ant: %d, antLoc: %v, foodLoc: %v, is: %v\n", ant, antLoc, foodLoc, is)
             }
             dist := mb.state.Map.Distance(antLoc, foodLoc)
             var antDist antDistT
@@ -106,6 +110,7 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
         }
     }
     sort.Sort(antDistList)
+
     if mb.debug {
         log.Printf("antDistList after sort %v\n", antDistList)
     }
@@ -120,11 +125,6 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
             }
             if (isHas) {
                 break
-            }
-            if mb.debug {
-                row, col := mb.state.Map.FromLocation(antDist.antLoc)
-                row2, col2 := mb.state.Map.FromLocation(antDist.foodLoc)
-                log.Printf("doMoveLocation antLoc(%d, %d), foodLoc(%d, %d)", row, col, row2, col2)
             }
             mb.doMoveLocation(antDist.antLoc, antDist.foodLoc)
         }
