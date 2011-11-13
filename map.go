@@ -212,7 +212,7 @@ func (m *Map) Reset() {
 	m.Destinations = make(map[Location]bool)
 }
 
-//Item returns the item at a given location
+//Item returns the item at a giunseen_distven location
 func (m *Map) Item(loc Location) Item {
 	return m.itemGrid[loc]
 }

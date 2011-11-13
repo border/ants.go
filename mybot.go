@@ -162,6 +162,44 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
             mb.doMoveLocation(antDist.antLoc, antDist.foodLoc)
         }
     }
+
+    // explore unseen areas
+    for antLoc, _ := range s.Map.Ants {
+         var isHas bool
+         for _, loc := range mb.orders {
+            if (antLoc == loc) {
+                isHas = true
+                break
+            }
+         }
+        if (isHas) {
+            break
+        }
+
+        var unseenList antDistListT
+        for unseen, item := range s.Map.itemGrid {
+            if (item != UNKNOWN) {
+                continue
+            }
+            unseenLoc := Location(unseen)
+
+            dist := mb.state.Map.Distance(antLoc, unseenLoc)
+            var unseenDist antDistT
+            unseenDist.dist, unseenDist.foodLoc = dist, unseenLoc
+            unseenList = append(unseenList, unseenDist)
+        }
+
+        sort.Sort(unseenList)
+
+        for _, unseenDist := range unseenList {
+            if mb.doMoveLocation(antLoc, unseenDist.foodLoc) {
+                s.Map.AddWater(antLoc)
+                break
+            }
+        }
+    }
+
+
 	//returning an error will halt the whole program!
 	return nil
 }
