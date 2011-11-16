@@ -4,6 +4,7 @@ import (
 	"os"
     "log"
     "sort"
+//    "rand"
 )
 
 type antDistT struct {
@@ -86,6 +87,14 @@ func (mb *MyBot) doMoveLocation(loc, dest Location) bool {
     return false
 }
 
+func isInLocMap(srcLoc map[Location]Location, tLoc Location) bool {
+     for _, loc := range srcLoc {
+        if (tLoc == loc) {
+            return true
+        }
+     }
+    return false
+}
 
 //DoTurn is where you should do your bot's actual work.
 func (mb *MyBot) DoTurn(s *State) os.Error {
@@ -126,19 +135,11 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
         }
         for antLoc, _ := range s.Map.Ants {
             if hillLoc == antLoc  {
-                var isHas bool
-                 for _, loc := range mb.orders {
-                    if (hillLoc == loc) {
-                        isHas = true
-                        break
-                    }
-                 }
-                if (isHas) {
-                    break
-                }
-	            for _, d := range dirs {
-                    if mb.doMoveDirection(hillLoc, d) {
-                        break
+                if isInLocMap(mb.orders, hillLoc) {
+                    for _, d := range dirs {
+                        if mb.doMoveDirection(hillLoc, d) {
+                            break
+                        }
                     }
                 }
             }
@@ -152,19 +153,12 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
     }
     for _, antDist := range antDistList {
         if _, is := mb.targets[antDist.foodLoc]; !is {
-            var isHas bool
-            for _, antLoc := range mb.targets {
-                if (antLoc == antDist.antLoc) {
-                    isHas = true
-                    break
-                }
+            if isInLocMap(mb.targets, antDist.antLoc) {
+                mb.doMoveLocation(antDist.antLoc, antDist.foodLoc)
             }
-            if (isHas) {
-                break
-            }
-            mb.doMoveLocation(antDist.antLoc, antDist.foodLoc)
         }
     }
+
 
     // The map exploration unseen areas
     for antLoc, _ := range s.Map.Ants {
