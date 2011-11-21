@@ -101,6 +101,7 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
 	dirs := []Direction{North, East, South, West}
     mb.state = s
     var antDistList antDistListT
+    var hillDistList antDistListT
     log.Printf("---------------------- DoTurn --------------------")
     log.Printf("-------------------targets: %v-----------------", mb.targets)
 
@@ -124,25 +125,6 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
             var antDist antDistT
             antDist.dist, antDist.antLoc, antDist.foodLoc = dist, antLoc, foodLoc
             antDistList = append(antDistList, antDist)
-
-        }
-    }
-
-    // unblock own hill
-    for hillLoc, hill := range s.Map.Hills {
-        if hill != MY_HILL {
-            continue
-        }
-        for antLoc, _ := range s.Map.Ants {
-            if hillLoc == antLoc  {
-                if isInLocMap(mb.orders, hillLoc) {
-                    for _, d := range dirs {
-                        if mb.doMoveDirection(hillLoc, d) {
-                            break
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -153,26 +135,41 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
     }
     for _, antDist := range antDistList {
         if _, is := mb.targets[antDist.foodLoc]; !is {
-            if isInLocMap(mb.targets, antDist.antLoc) {
+            if !isInLocMap(mb.targets, antDist.antLoc) {
                 mb.doMoveLocation(antDist.antLoc, antDist.foodLoc)
             }
         }
     }
 
+    // attack Hills
+    for hillLoc, hill := range s.Map.Hills {
+        if hill != MY_HILL {
+            continue
+        }
+        for antLoc, ant := range s.Map.Ants {
+            if ant != MY_ANT {
+                continue
+            }
+
+            if !isInLocMap(mb.orders, antLoc) {
+                continue
+            }
+            dist := mb.state.Map.Distance(antLoc, hillLoc)
+            var hillDist antDistT
+            hillDist.dist, hillDist.foodLoc, hillDist.foodLoc = dist, antLoc, hillLoc
+            hillDistList = append(hillDistList, hillDist)
+        }
+    }
+    sort.Sort(hillDistList)
+    for _, hillDist := range hillDistList {
+        mb.doMoveLocation(hillDist.antLoc, hillDist.foodLoc)
+    }
 
     // The map exploration unseen areas
     for antLoc, _ := range s.Map.Ants {
-         var isHas bool
-         for _, loc := range mb.orders {
-            if (antLoc == loc) {
-                isHas = true
-                break
-            }
-         }
-        if (isHas) {
-            break
+        if isInLocMap(mb.orders, antLoc) {
+            continue
         }
-
         var unseenList antDistListT
         for unseen, item := range s.Map.itemGrid {
             if (item != UNKNOWN) {
@@ -190,12 +187,28 @@ func (mb *MyBot) DoTurn(s *State) os.Error {
 
         for _, unseenDist := range unseenList {
             if mb.doMoveLocation(antLoc, unseenDist.foodLoc) {
-                s.Map.AddWater(antLoc)
                 break
             }
         }
     }
 
+    // unblock own hill
+    for hillLoc, hill := range s.Map.Hills {
+        if hill != MY_HILL {
+            continue
+        }
+        for antLoc, _ := range s.Map.Ants {
+            if hillLoc == antLoc  {
+                if !isInLocMap(mb.orders, hillLoc) {
+                    for _, d := range dirs {
+                        if mb.doMoveDirection(hillLoc, d) {
+                            break
+                        }
+                    }
+                }
+            }
+        }
+    }
 	//returning an error will halt the whole program!
 	return nil
 }
