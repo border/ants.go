@@ -7,6 +7,8 @@ import (
 //    "rand"
 )
 
+var maxint float64 = 9999
+
 type antDistT struct {
     dist float64
     antLoc Location
@@ -24,6 +26,73 @@ type MyBot struct {
     targets map[Location]Location
     state *State
 }
+
+func (mb *MyBot)ClosestFood(loc Location, filter map[Location]Location) (retLoc Location) {
+    minDist := maxint
+    for foodLoc, _ := range mb.state.Map.Food {
+        if (len(filter) == 0) || (!isInLocMap(filter, foodLoc)) {
+            dist := mb.state.Map.Distance(loc, foodLoc)
+            if dist < minDist {
+                minDist = dist
+                retLoc = foodLoc
+            }
+        }
+    }
+    return
+}
+
+func (mb *MyBot)ClosestEnemyAnt(loc Location, filter map[Location]Location) (retLoc Location) {
+    minDist := maxint
+    for hillAntLoc, ant := range mb.state.Map.Ants {
+        if ant == MY_ANT {
+            continue
+        }
+        if (len(filter) == 0) || (!isInLocMap(filter, hillAntLoc)) {
+            dist := mb.state.Map.Distance(loc, hillAntLoc)
+            if dist < minDist {
+                minDist = dist
+                retLoc = hillAntLoc
+            }
+        }
+    }
+    return
+}
+
+func (mb *MyBot)ClosestEnemyHill(loc Location, filter map[Location]Location) (retLoc Location) {
+    minDist := maxint
+    for hillLoc, ant := range mb.state.Map.Hills {
+        if ant == MY_HILL {
+            continue
+        }
+        if (len(filter) == 0) || (!isInLocMap(filter, hillLoc)) {
+            dist := mb.state.Map.Distance(loc, hillLoc)
+            if dist < minDist {
+                minDist = dist
+                retLoc = hillLoc
+            }
+        }
+    }
+    return
+}
+
+func (mb *MyBot)ClosestUnseen(loc Location, filter map[Location]Location) (retLoc Location) {
+    minDist := maxint
+    var unseenLoc Location
+    for row :=0; row < mb.state.Map.Rows; row++ {
+        for col := 0; col < mb.state.Map.Cols; col++ {
+            unseenLoc = mb.state.Map.FromRowCol(row, col)
+            if (len(filter) == 0) || (!isInLocMap(filter, unseenLoc)) {
+                dist := mb.state.Map.Distance(loc, unseenLoc)
+                if dist < minDist {
+                    minDist = dist
+                    retLoc = unseenLoc
+                }
+            }
+        }
+    }
+    return
+}
+
 
 func (a antDistListT) Swap(i, j int) {
     a[i], a[j] = a[j], a[i]
